@@ -120,6 +120,10 @@ member y [] = False
 member y (x:xs) = if y == x then True else member y xs
 
 --Task 21
+fib n = helpFib 0 1 0
+    where helpFib x y i
+        | i == n = x
+        | otherwise helpFib y (x + y) (i + 1)
 
 --Task 22
 sum' :: Num a => [a] -> a
@@ -270,60 +274,26 @@ unzip' [(x,y)] = ([x], [y])
 unzip' (x:xs) = helpUnzip (get1stInTuple x, get2ndInTuple x) (unzip' xs)
 
 --for task 36
-isThisElemInList :: Int -> [Int] -> Bool
-isThisElemInList x (y:ys)
+isInList :: Int -> [Int] -> Bool
+isInList x [y]
     | x == y = True
     |otherwise = False
+isInList x (y:ys)
+    | x == y = True
+    |otherwise = isInList x ys
 
 --for task 36
---isInList :: Int -> [[Int]] -> [[Int]]
---isInList _ [] = []
---isInList x [y]
---    |
---    |
---isInList x (y:ys)
---    | isThisElemInList x y == True = ((x:y):ys)
---    | otherwise = isInList ys
+addToList :: Int -> [[Int]] -> [[Int]]
+addToList _ [] = []
+addToList x [y]
+    | isInList x y = [x : y]
+    | otherwise = [x] : [y]
+addToList x (y:ys)
+    | isInList x y = (x : y) : ys
+    | otherwise =  y : addToList x ys
 
 --task 36
---group' :: [Int] -> [[Int]]
---group' [] = []
---group' 
-
---week 2
-map' :: (a -> b) -> [a] -> [b]
-map' _ [] = []
-map' func (x:xs) = func x : map' func xs
-
-filter' :: (a -> Bool) -> [a] -> [a]
-filter _ [] = []
-filter' func (x:xs)
-    | func x == True = x : filter' func xs
-    | otherwise = filter' func xs
-
-foldl' :: (a -> b -> a) -> a -> [b] -> a
-foldl' _ acc [] = acc
-foldl' func acc (x:xs) = foldl' func (func acc x) xs
-
---task 1
--- foldl ([b] -> a -> [b]) -> [b] -> [a] -> [b]
-map'' :: (a -> b) -> [a] -> [b]
-map'' func l = reverse $ foldl (\acc x -> func x : acc) [] l
-
---map (+1) [1, 2, 3] = reverse $ foldl () [] [1, 2, 3]
---
---foldl (\acc x -> func x : acc) [] l = foldl func [2] [2, 3]
---foldl func [2] [2, 3] = foldl func (func [2] 2) [3]
---
---(func [2] 2) = (\[2] 2 -> (+1) 2 : [2]) = [3, 2]
---
---foldl func [2] [2, 3] = foldl func [3, 2] [3]
---foldl func [3, 2] [3] = foldl func [4, 3, 2] []
---foldl func [4, 3, 2] [] = [4, 3, 2]
-
---task 2
---foldl' :: ([a] -> a -> [a]) -> [a] -> [a] -> [a]
-filter'' :: (a -> Bool) -> [a] -> [a]
-filter'' func l = foldl (\acc x -> if func x then x : acc else acc) [] l
-
-
+group' :: [Int] -> [[Int]]
+group' [] = []
+group' [x] = [[x]]
+group' (x:xs) = addToList x (group' xs)
