@@ -119,11 +119,22 @@ member :: Int -> [Int] -> Bool
 member y [] = False
 member y (x:xs) = if y == x then True else member y xs
 
---Task 21
+--for task 21
+fib :: Int -> Int
 fib n = helpFib 0 1 0
     where helpFib x y i
-        | i == n = x
-        | otherwise helpFib y (x + y) (i + 1)
+             | i == n = x
+             | otherwise = helpFib y (x + y) (i + 1)
+
+--task 21
+isFibonacciSequence :: [Int] -> Bool
+isFibonacciSequence [] = False
+isFibonacciSequence [x] = x == fib 1
+isFibonacciSequence x = iFSHelper x 0
+    where iFSHelper [x] acc = x == fib acc
+          iFSHelper (x:xs) acc
+            | x == fib acc = iFSHelper xs (acc + 1)
+            | otherwise = False
 
 --Task 22
 sum' :: Num a => [a] -> a
@@ -172,6 +183,10 @@ string2number (x:xs) = (((ord x) - (ord '0')) * 10 ^ (length(x:xs) - 1)) + strin
 
 --task 27
 --isValidID :: [Char] -> Int
+
+
+
+
 
 --for task 28
 fromIDtoDayAndMonth :: [Char] -> (Int, Int)
@@ -228,7 +243,7 @@ getLastElem [x] = x
 getLastElem (x:xs) = getLastElem xs
 
 --task 30
-concatenate :: [Int] -> [Int] -> [Int]
+concatenate :: [a] -> [a] -> [a]
 concatenate [] [] = []
 concatenate [x] y = x : y
 concatenate (x:xs) y = x : concatenate xs y
@@ -297,3 +312,158 @@ group' :: [Int] -> [[Int]]
 group' [] = []
 group' [x] = [[x]]
 group' (x:xs) = addToList x (group' xs)
+
+--for task 37
+isPyth :: Int -> Int -> Int -> Bool
+isPyth x y z
+    | ((x ^ 2) + (y ^ 2) == (z ^ 2)) || ((z ^ 2) + (y ^ 2) == (x ^ 2)) || ((x ^ 2) + (z ^ 2) == (y ^ 2)) = True
+    | otherwise = False
+
+--for task 37
+isPythInList :: Int -> Int -> [Int] -> Bool
+isPythInList _ _ [] = False
+isPythInList x y [z]
+    | isPyth x y z = True
+    | otherwise = False
+isPythInList x y (z:zs)
+    | isPyth x y z = True
+    | otherwise = isPythInList x y zs
+
+--for task 37
+getPythInList :: Int -> Int -> [Int] -> (Int, Int, Int)
+getPythInList x y (z:zs)
+    | isPyth x y z = getPyth x y z
+    | otherwise = getPythInList x y zs
+
+--for task 37
+getPyth :: Int -> Int -> Int -> (Int, Int, Int)
+getPyth x y z
+    | z > y && y >= x = (x ,y ,z)
+    | x > y && y >= z = (z, y, x)
+    | z > x && x >= y = (y, x, z)
+    | x > z && z >= y = (y, z, x)
+    | y > x && x >= z = (z, x, y)
+    | otherwise = (x, z, y)
+
+--for task 37
+removeDuplicates :: Eq a => [a] -> [a]
+removeDuplicates = rdHelper []
+    where rdHelper seen [] = seen
+          rdHelper seen (x:xs)
+              | x `elem` seen = rdHelper seen xs
+              | otherwise = rdHelper (seen ++ [x]) xs
+
+--for task 37
+helpPyths :: Int -> [Int] -> [Int] -> [(Int, Int, Int)]
+helpPyths _ [] [] = []
+helpPyths x y [z]
+    | isPythInList x z y = [getPythInList x z y]
+    | otherwise = []
+helpPyths x y (z:zs)
+    | isPythInList x z y = getPythInList x z y : helpPyths x y zs
+    | otherwise = helpPyths x y zs
+
+--for task 37
+helpPyths' :: [Int] -> [Int] -> [Int] -> [(Int, Int, Int)]
+helpPyths' [] _ _ = []
+helpPyths' [x] y z = helpPyths x y z
+helpPyths' (x:xs) y z
+    | (helpPyths x y z) == [] = (helpPyths' xs y z)
+    | otherwise = concatenate (helpPyths x y z) (helpPyths' xs y z)
+
+--task 37
+pyths :: Int -> Int -> [(Int, Int, Int)]
+pyths x y = removeDuplicates (helpPyths' [x..y] [x..y] [x..y])
+
+--task 38
+multiplyBy :: Int -> (Int -> Int)
+multiplyBy x = \y -> y * x 
+
+--for task 39
+getDigitsInNumber :: Int -> [Int]
+getDigitsInNumber x
+    | x < 10 = [x]
+    | otherwise = (x `mod` 10) : getDigitsInNumber(x `div` 10)
+
+--taks 39
+lastDigits :: [Int] -> [Int]
+lastDigits [] = []
+lastDigits [x] = getDigitsInNumber x
+lastDigits (x:xs) = removeDuplicates (concatenate (getDigitsInNumber x) (lastDigits xs))
+
+--task 40
+stringsToIntegers :: [[Char]] -> [Int]
+stringsToIntegers [] = []
+stringsToIntegers [x] = [string2number x]
+stringsToIntegers (x:xs) = string2number x : stringsToIntegers xs
+
+--task 41
+fibonaccis :: [Int] -> [Int]
+fibonaccis [] = []
+fibonaccis [x] = [fib x]
+fibonaccis (x:xs) = fib x : fibonaccis xs
+
+--task 42
+--applyToAll :: (Int -> Int) -> ([Int] -> [Int])
+
+
+
+
+--task 43 for rewriting
+
+
+
+
+
+--task 44
+odds :: [Int] -> [Int]
+odds [] = []
+odds [x]
+    | odd' x = [x]
+    | otherwise = []
+odds (x:xs)
+    | odd' x = x : odds xs
+    | otherwise = odds xs
+
+--task 45
+divisibles :: Int -> ([Int] -> [Int])
+divisibles x = \y -> dHelper y
+    where dHelper [] = []
+          dHelper [y]
+              | y `mod` x == 0 = [y]
+              | otherwise = []
+          dHelper (y:ys)
+              | y `mod` x == 0 = y : dHelper ys
+              | otherwise = dHelper ys
+
+--task 46
+filterBy :: (Int -> Bool) -> ([Int] -> [Int])
+filterBy func = \x -> helpFunc x
+    where helpFunc [] = []
+          helpFunc [x]
+              | func x = [x]
+              | otherwise = []
+          helpFunc (x:xs)
+              | func x = x : helpFunc xs
+              | otherwise = helpFunc xs
+
+--task 47 for rewriting
+
+
+
+--task 48
+concat' :: [[Int]] -> [Int]
+concat' [] = []
+concat' [x] = x
+concat' (x:xs) = concatenate x (concat' xs)
+
+--task 49
+reduce :: (Int -> Int -> Int) -> Int -> ([Int] -> Int)
+reduce func x = \y -> summAllInList func x y
+    where summAllInList _ _ [] = 0
+          summAllInList func x [y] = func y x
+          summAllInList func x (y:ys) = func (func y x) (summAllInList func x ys)
+
+--task 50
+
+--task 51
