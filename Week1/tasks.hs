@@ -1,4 +1,3 @@
-
 map' :: (a -> b) -> [a] -> [b]
 map' _ [] = []
 map' func (x:xs) = func x : map' func xs
@@ -34,4 +33,8 @@ map'' func l = reverse $ foldl (\acc x -> func x : acc) [] l
 filter'' :: (a -> Bool) -> [a] -> [a]
 filter'' func l = foldl (\acc x -> if func x then x : acc else acc) [] l
 
+--task 3
 
+--task 4
+repeat' :: Int -> [Int]
+repeat' x = [x] ++ repeat' x

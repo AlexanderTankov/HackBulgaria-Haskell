@@ -467,3 +467,10 @@ reduce func x = \y -> summAllInList func x y
 --task 50
 
 --task 51
+--crash with first example
+zipWith' :: (a -> a -> a) -> ([a] -> [a] -> [a])
+zipWith' func = \x y -> zipHelper x y
+    where zipHelper [] [] = []
+          zipHelper [x] (y:ys) = [func x y]
+          zipHelper (x:xs) [y] = [func x y]
+          zipHelper (x:xs) (y:ys) = func x y : zipHelper xs ys
