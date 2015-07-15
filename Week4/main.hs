@@ -1,12 +1,13 @@
 --this is main.hs for www.fpcompleate.com
 --Fractal are included from week2
 
-mmodule Main where
+module Main where
 
 import Yesod
 import Render (render)
 import Fractals (drawMandelbrot, screen)
 import Codec.Picture (encodePng, generateImage)
+import Data.ByteString.Lazy.Internal (ByteString)
 
 data App = App
 instance Yesod App
@@ -26,8 +27,10 @@ getHeyR myname = defaultLayout $ [whamlet| <h1> Hello #{myname}! |]
 
 getAlexR = defaultLayout $ [whamlet| <h1> Hello Alex! |]
 
-mandelbrotHelper x y = encodePng $ generateImage (render (drawMandelbrot x y)) (round x) (round y)
+mandelbrotHelper :: Int -> Int -> ByteString
+mandelbrotHelper x y = encodePng $ generateImage (render (drawMandelbrot (fromIntegral x) (fromIntegral y))) x y
 
+mandelbrotRHlp :: MonadHandler m => Int -> Int -> m TypedContent
 mandelbrotRHlp x y = sendResponse $ toTypedContent (typePng, toContent $ mandelbrotHelper x y)
 
 getMandelbrotR :: MonadHandler m => m TypedContent
