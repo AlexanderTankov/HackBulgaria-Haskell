@@ -33,6 +33,9 @@ satisfy p = Parser $ \s ->
 char :: Char -> Parser Char
 char = satisfy . (==)
 
+var :: Parser String
+var = str "var"
+
 openingBrace :: Parser Char
 openingBrace = char '('
 
@@ -40,7 +43,7 @@ closingBrace :: Parser Char
 closingBrace = char ')'
 
 inBraces :: Parser a -> Parser a
-inBraces p = openingBrace *> p <* closingBrace
+inBraces p = (openingBrace *> spaces) *> p <* (spaces <* closingBrace)
 
 openingBracket :: Parser Char
 openingBracket = char '{'
@@ -48,8 +51,21 @@ openingBracket = char '{'
 closingBracket :: Parser Char
 closingBracket = char '}'
 
+endingLine :: Parser Char
+endingLine = char ';'
+
 inBrackets :: Parser a -> Parser a
-inBrackets p = openingBracket *> p <* closingBracket
+inBrackets p = (openingBracket *> spaces) *> p <* (spaces <* closingBracket)
+
+str :: String -> Parser String
+str ""     = pure ""
+str (x:xs) = liftA2 (:) (char x) $ str xs
+
+space :: Parser Char
+space = char ' ' <|> char '\t' <|> char '\n'
+
+spaces :: Parser String
+spaces  = zeroOrMore space
 
 instance Alternative Parser where
   empty = Parser $ const Nothing

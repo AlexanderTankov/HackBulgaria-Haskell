@@ -58,3 +58,11 @@ execStatement s vars =
 execS :: State -> State
 execS (State (s:ss) vars) = State ss $ execStatement s vars
 execS s                   = s
+
+-- Running the whole program and returning the final State
+runProgram :: [Statement] -> String
+runProgram ss = loop (State ss Map.empty)
+  where loop (State [] st) = output st
+        loop s             = loop $ execS s
+        output = intercalate "\n" .
+          map (\(k, v) -> show k ++ " = " ++ show v) . Map.assocs

@@ -8,10 +8,6 @@ import qualified Data.Char as C
   , isDigit
   )
 
-str :: String -> Parser String
-str ""     = pure ""
-str (x:xs) = liftA2 (:) (char x) $ str xs
-
 plusP, minusP, multP, divP, modP, gtP, geP, ltP, leP, eqlP :: Parser Oper
 
 plusP = const Plus <$> str "+"
@@ -38,18 +34,25 @@ oper :: Parser Oper
 oper = plusP <|> minusP <|> multP <|> divP <|> modP <|> gtP <|> geP <|> ltP <|> leP <|> eqlP
 
 variable :: Parser Variable
-variable = oneOrMore $ satisfy C.isAlpha
+variable = ((var <* spaces) <|> spaces) *> (oneOrMore $ satisfy C.isAlpha)
 
 value :: Parser Value
 value = read <$> (oneOrMore $ satisfy C.isDigit)
 
+opP :: Parser Expr
+opP = liftA3 Op (varP <|> valP <|> inBraces opP) (spaces *> oper <* spaces) (varP <|> valP <|> inBraces opP)
+
+valP :: Parser Expr
+valP = Val <$> value
+
+varP :: Parser Expr
+varP = Var <$> variable
+
 expr :: Parser Expr
-expr = Var <$> variable
-       <|> Val <$> value
-       <|> liftA3 Op expr oper expr
+expr = opP <|> valP <|> varP
 
 assignP :: Parser Statement
-assignP = liftA2 Assign (variable <* char '=') expr
+assignP = liftA2 Assign (variable <* (spaces *> char '=' <* spaces)) expr
 
 incrP :: Parser Statement
 incrP = Incr <$> (str "++" *> variable)
@@ -58,13 +61,17 @@ decrP :: Parser Statement
 decrP = Decr <$> (str "--" *> variable)
 
 ifP :: Parser Statement
-ifP = str "if" *> liftA2 If (inBraces expr) (inBrackets statement)
+ifP = str "if" *> liftA2 If (spaces *> (inBraces expr) <* spaces) ((inBrackets statement) <* spaces)
 
 forP :: Parser Statement
-forP = str "for" *> (For <$> (openingBrace *> statement) <*> (str ";" *> expr) <*> (str ";" *> statement <* closingBrace) <*> (inBrackets statement))
+forP = str "for" *> (inBraces(liftA3 For statement (spaces *> (expr <* endingLine) <* spaces) (assignP <|> incrP <|> decrP)) <* spaces) <*> ((inBrackets statement) <* spaces)
 
 interpret :: Parser [Statement]
 interpret = oneOrMore statement
 
 statement :: Parser Statement
-statement = assignP <|> incrP <|> decrP <|> ifP <|> forP
+statement = assignP <* (endingLine <* spaces) <|> incrP <* (endingLine <* spaces) <|> decrP <* (endingLine <* spaces) <|> ifP <|> forP
+
+main = do
+    content <- readFile "test"
+    print $ parse interpret content
