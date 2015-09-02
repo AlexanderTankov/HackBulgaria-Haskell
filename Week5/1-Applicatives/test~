@@ -1,6 +1,5 @@
 ++i;
 var sum = 0;
-var alex = 0;
 --i;
 if(  sum == 0  )
 {

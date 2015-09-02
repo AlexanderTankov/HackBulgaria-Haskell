@@ -3,11 +3,14 @@ module Interpreter where
 
 import Statement
 import qualified Data.Map.Strict as Map
-  ( lookup
+  ( Map
+  , lookup
   , insert
   , updateWithKey
   , empty
+  , assocs
   )
+import Data.List (intercalate)
 import Control.Applicative (liftA2)
 
 
@@ -45,8 +48,8 @@ execStatement s vars =
                        evalE expr vars
   Incr var -> Map.updateWithKey (\_ -> Just . (+1)) var vars
   Decr var -> Map.updateWithKey (\_ -> Just . (subtract 1)) var vars
-  If cond body1 body2 -> flip execStatement vars $
-    if evalE cond vars == Just 1 then body1 else body2
+  If cond body1 -> flip execStatement vars $
+    if evalE cond vars == Just 1 then body1 else body1
   For init cond step body -> loop cond step body (execStatement init vars)
     where loop cond step body vars' =
             let vars'' = execStatement step $ execStatement body vars'
@@ -58,6 +61,7 @@ execStatement s vars =
 execS :: State -> State
 execS (State (s:ss) vars) = State ss $ execStatement s vars
 execS s                   = s
+
 
 -- Running the whole program and returning the final State
 runProgram :: [Statement] -> String
