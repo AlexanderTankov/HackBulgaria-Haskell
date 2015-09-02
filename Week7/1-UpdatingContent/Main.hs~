@@ -1,6 +1,0 @@
-import http-conduit
-
-haskellOrgsContent :: IO ByteString
-haskellOrgsContent = simpleHttp "http://haskell.org"
-
-main = undefined
